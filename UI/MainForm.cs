@@ -1,6 +1,7 @@
 namespace PidgeonCarrier
 {
     using PidgeonCarrier.Game;
+    using PidgeonCarrier.UI;
     using System.Windows.Forms;
 
     public partial class MainForm : Form
@@ -61,14 +62,6 @@ namespace PidgeonCarrier
         {
             _pidgeon.Update();
 
-            if (_pidgeon.IsOutOfBounds(ClientSize.Height))
-            {
-                _gameTimer.Stop();
-                MessageBox.Show("Game Over!");
-                _pidgeon = new Pidgeon(100, this.ClientSize.Height / 2);
-                _gameTimer.Start();
-            }
-
             foreach (var tree in _trees)
             {
                 tree.Update(TreeSpeed);
@@ -79,13 +72,40 @@ namespace PidgeonCarrier
                     _score++;
                 }
 
-                if (_pidgeon.GetBounds().IntersectsWith(tree.GetTopBounds()) ||
+                if (_pidgeon.IsOutOfBounds(ClientSize.Height) ||
+                    _pidgeon.GetBounds().IntersectsWith(tree.GetTopBounds()) ||
                     _pidgeon.GetBounds().IntersectsWith(tree.GetBottomBounds()))
                 {
                     _gameTimer.Stop();
-                    MessageBox.Show($"Game Over! Your score: {_score}");
-                    ResetGame();
-                    return;
+
+                    if (_score > 0 && HighScoreManager.IsHighScore(_score))
+                    {
+                        string playerName = Prompt.ShowDialog("New High Score! Enter your name:", "High Score");
+                        if (!string.IsNullOrWhiteSpace(playerName))
+                        {
+                            HighScoreManager.AddScore(playerName, _score);
+                        }
+                        else
+                        {
+
+                        }
+                    }
+
+                    var result = MessageBox.Show(
+                        $"Game Over! Your Score: {_score}\nDo you want to restart the game?",
+                        "Game Over",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question
+                    );
+
+                    if (result == DialogResult.Yes)
+                    {
+                        ResetGame();
+                    }
+                    else
+                    {
+                        Close();
+                    }
                 }
             }
         }
