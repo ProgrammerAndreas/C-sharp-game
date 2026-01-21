@@ -14,6 +14,8 @@ namespace PidgeonCarrier
         private const float TreeSpeed = 4f;
         private const int TreeSpacing = 300;
 
+        private int _score = 0;
+
         public MainForm()
         {
             InitializeComponent();
@@ -74,13 +76,14 @@ namespace PidgeonCarrier
                 if (tree.X + tree.Width < 0)
                 {
                     tree.Reset(ClientSize.Width);
+                    _score++;
                 }
 
                 if (_pidgeon.GetBounds().IntersectsWith(tree.GetTopBounds()) ||
                     _pidgeon.GetBounds().IntersectsWith(tree.GetBottomBounds()))
                 {
                     _gameTimer.Stop();
-                    MessageBox.Show("Game Over!");
+                    MessageBox.Show($"Game Over! Your score: {_score}");
                     ResetGame();
                     return;
                 }
@@ -97,6 +100,9 @@ namespace PidgeonCarrier
             {
                 tree.Draw(graphics, ClientSize.Height);
             }
+
+            Font scoreFont = new("Arial", 24, FontStyle.Bold);
+            graphics.DrawString($"Score: {_score}", scoreFont, Brushes.Black, 10, 10);
         }
 
         private void ResetGame()
@@ -108,6 +114,7 @@ namespace PidgeonCarrier
                 _trees[i].Reset(ClientSize.Width + i * TreeSpacing);
             }
 
+            _score = 0;
             _gameTimer.Start();
         }
     }
