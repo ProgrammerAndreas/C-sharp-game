@@ -10,6 +10,10 @@ namespace PidgeonCarrier
 
         private Pidgeon _pidgeon;
 
+        private readonly List<Tree> _trees = [];
+        private const float TreeSpeed = 4f;
+        private const int TreeSpacing = 300;
+
         public MainForm()
         {
             InitializeComponent();
@@ -17,7 +21,12 @@ namespace PidgeonCarrier
             DoubleBuffered = true;
             KeyPreview = true;
 
-            _pidgeon = new Pidgeon(100, this.ClientSize.Height / 2);
+            _pidgeon = new Pidgeon(100, ClientSize.Height / 2);
+
+            for (int i = 0; i < 3; i++)
+            {
+                _trees.Add(new Tree(ClientSize.Width + i * TreeSpacing, ClientSize.Height));
+            }
 
             _gameTimer.Interval = 1000 / TargetFps;
             _gameTimer.Tick += GameLoop;
@@ -50,12 +59,31 @@ namespace PidgeonCarrier
         {
             _pidgeon.Update();
 
-            if (_pidgeon.IsOutOfBounds(this.ClientSize.Height))
+            if (_pidgeon.IsOutOfBounds(ClientSize.Height))
             {
                 _gameTimer.Stop();
                 MessageBox.Show("Game Over!");
                 _pidgeon = new Pidgeon(100, this.ClientSize.Height / 2);
                 _gameTimer.Start();
+            }
+
+            foreach (var tree in _trees)
+            {
+                tree.Update(TreeSpeed);
+
+                if (tree.X + tree.Width < 0)
+                {
+                    tree.Reset(ClientSize.Width);
+                }
+
+                if (_pidgeon.GetBounds().IntersectsWith(tree.GetTopBounds()) ||
+                    _pidgeon.GetBounds().IntersectsWith(tree.GetBottomBounds()))
+                {
+                    _gameTimer.Stop();
+                    MessageBox.Show("Game Over!");
+                    ResetGame();
+                    return;
+                }
             }
         }
 
@@ -64,6 +92,23 @@ namespace PidgeonCarrier
             graphics.Clear(Color.SkyBlue);
 
             _pidgeon.Draw(graphics);
+
+            foreach (var tree in _trees)
+            {
+                tree.Draw(graphics, ClientSize.Height);
+            }
+        }
+
+        private void ResetGame()
+        {
+            _pidgeon = new Pidgeon(100, ClientSize.Height / 2);
+
+            for (int i = 0; i < _trees.Count; i++)
+            {
+                _trees[i].Reset(ClientSize.Width + i * TreeSpacing);
+            }
+
+            _gameTimer.Start();
         }
     }
 }
