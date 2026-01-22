@@ -8,13 +8,19 @@ namespace PidgeonCarrier.UI
         {
             InitializeComponent();
 
-            lstLevels.Items.Add("Classic (Normal)");
+            lstLevels.Items.Add("Endless");
+            lstLevels.Items.Add("StoryMode");
             lstLevels.SelectedIndex = 0;
         }
 
         private void BtnPlay_Click(object sender, EventArgs e)
         {
-            GameLevel selectedLevel = GameLevel.Classic;
+            GameLevel selectedLevel = lstLevels.SelectedIndex switch
+            {
+                0 => GameLevel.Endless,
+                1 => GameLevel.StoryMode,
+                _ => GameLevel.Endless
+            };
 
             MainForm gameForm = new(selectedLevel);
             Hide();
