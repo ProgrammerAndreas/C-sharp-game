@@ -25,9 +25,6 @@ namespace PidgeonCarrier
 
         private bool _isGameOver = false;
 
-        private FinishLine? _finishLine;
-        private bool _levelHasFinishLine;
-
         public MainForm(GameLevel level)
         {
             InitializeComponent();
@@ -76,18 +73,26 @@ namespace PidgeonCarrier
             {
                 tree.Update(TreeSpeed);
 
-                if (tree.X + tree.Width < 0)
+                if (_level == GameLevel.Endless)
                 {
-                    tree.Reset(ClientSize.Width);
-
-                    if (_level == GameLevel.Endless)
-                    { 
-                        _score++; 
+                    if (tree.X + tree.Width < 0)
+                    {
+                        tree.Reset(ClientSize.Width);
+                        _score++;
                     }
-
-                    else if (_level == GameLevel.StoryMode)
+                }
+                else if (_level == GameLevel.StoryMode)
+                {
+                    if (!tree.IsFinishTree && !tree.HasBeenPassed && tree.X + tree.Width == _pidgeon.Position.X)
                     {
                         _treesPassed++;
+                        tree.HasBeenPassed = true;
+                    }
+
+                    if (tree.IsFinishTree && tree.X + tree.Width == _pidgeon.Position.X)
+                    {
+                        HandleLevelComplete();
+                        return;
                     }
                 }
 
@@ -104,17 +109,6 @@ namespace PidgeonCarrier
                 HandleGameOver();
                 return;
             }
-
-            if (_level == GameLevel.StoryMode && _finishLine != null)
-            {
-                _finishLine.Update((int)TreeSpeed);
-
-                if (_pidgeon.GetBounds().IntersectsWith(_finishLine.GetBounds(ClientSize.Height)))
-                {
-                    HandleLevelComplete();
-                    return;
-                }
-            }
         }
 
         private void DrawGame(Graphics graphics)
@@ -126,11 +120,6 @@ namespace PidgeonCarrier
             foreach (var tree in _trees)
             {
                 tree.Draw(graphics, ClientSize.Height);
-            }
-
-            if (_level == GameLevel.StoryMode && _finishLine != null)
-            {
-                _finishLine.Draw(graphics, ClientSize.Height);
             }
 
             if (_level == GameLevel.Endless)
@@ -255,31 +244,27 @@ namespace PidgeonCarrier
 
             _pidgeon = new Pidgeon(100, ClientSize.Height / 2);
 
-            if (_trees.Count == 0)
+            _trees.Clear();
+
+            if (_level == GameLevel.Endless)
             {
                 for (int i = 0; i < 3; i++)
                 {
                     _trees.Add(new Tree(ClientSize.Width + i * TreeSpacing, ClientSize.Height));
                 }
             }
-            else
+            else if (_level == GameLevel.StoryMode)
             {
-                for (int i = 0; i < _trees.Count; i++)
+                for (int i = 0; i < _treesToWin; i++)
                 {
-                    _trees[i].Reset(ClientSize.Width + i * TreeSpacing);
+                    var tree = new Tree(ClientSize.Width + i * TreeSpacing, ClientSize.Height);
+
+                    if (i == _treesToWin - 1)
+                        tree.IsFinishTree = true;
+
+                    tree.HasBeenPassed = false;
+                    _trees.Add(tree);
                 }
-            }
-            
-            if (_level == GameLevel.StoryMode)
-            {
-                int finishX = ClientSize.Width + _treesToWin * TreeSpacing + 50;
-                _finishLine = new FinishLine(finishX);
-                _levelHasFinishLine = true;
-            }
-            else
-            {
-                _finishLine = null;
-                _levelHasFinishLine = false;
             }
         }
     }

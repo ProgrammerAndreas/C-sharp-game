@@ -8,6 +8,8 @@
         public float Width { get; } = 60;
         public float GapHeight { get; } = 150;
         public float TopHeight { get; private set; }
+        public bool IsFinishTree { get; set; } = false;
+        public bool HasBeenPassed { get; set; } = false;
 
         private readonly int formHeight;
 
@@ -37,10 +39,11 @@
 
         public void Draw(Graphics g, int formHeight)
         {
+            Brush brush = IsFinishTree ? Brushes.Gold : Brushes.Green;
             // Top trees
-            g.FillRectangle(Brushes.Green, X, 0, Width, TopHeight);
+            g.FillRectangle(brush, X, 0, Width, TopHeight);
             // Bottom trees
-            g.FillRectangle(Brushes.Green, X, TopHeight + GapHeight, Width, formHeight - (TopHeight + GapHeight));
+            g.FillRectangle(brush, X, TopHeight + GapHeight, Width, formHeight - (TopHeight + GapHeight));
         }
 
         public RectangleF GetTopBounds()
