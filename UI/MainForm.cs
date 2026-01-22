@@ -174,7 +174,7 @@ namespace PidgeonCarrier
             _isGameOver = true;
             _gameTimer.Stop();
 
-            if (_score > 0 && HighScoreManager.IsHighScore(_score))
+            if (_level == GameLevel.Endless && _score > 0 && HighScoreManager.IsHighScore(_score))
             {
                 string playerName = Prompt.ShowDialog(
                     "New High Score! Enter your name:",
@@ -187,8 +187,12 @@ namespace PidgeonCarrier
                 }
             }
 
+            string message = _level == GameLevel.Endless
+                ? $"Game Over! Your Score: {_score}\nDo you want to restart the game?"
+                : "Game Over!\nDo you want to restart the game?";
+
             var result = MessageBox.Show(
-                $"Game Over! Your Score: {_score}\nDo you want to restart the game?",
+                message,
                 "Game Over",
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Question
