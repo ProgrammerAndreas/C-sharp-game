@@ -2,24 +2,38 @@
 {
     public static class Prompt
     {
-        public static string ShowDialog(string text, string caption)
+        public static string ShowDialog(string message, string title)
         {
             Form promt = new()
             {
-                Width = 300,
-                Height = 180,
+                Width = 320,
+                Height = 170,
+                Text = title,
                 FormBorderStyle = FormBorderStyle.FixedDialog,
-                Text = caption,
-                StartPosition = FormStartPosition.CenterScreen
+                StartPosition = FormStartPosition.CenterScreen,
+                MinimizeBox = false,
+                MaximizeBox = false
             };
 
-            Label textLabel = new() { Left = 10, Top = 20, Text = text, Width = 260 };
-            TextBox textBox = new() { Left = 10, Top = 50, Width = 260 };
+            Label textLabel = new() 
+            { 
+                Text = message, 
+                Left = 10, 
+                Top = 15, 
+                Width = 280,
+                Height = 30
+            };
+            TextBox textBox = new() 
+            { 
+                Left = 10, 
+                Top = 50, 
+                Width = 280 
+            };
             Button confirmation = new() { 
                 Text = "OK", 
-                Left = 200, 
-                Width = 70, 
+                Left = 140, 
                 Top = 90, 
+                Width = 70, 
                 Height = 30,
                 DialogResult = DialogResult.OK,
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -27,9 +41,9 @@
             };
             Button cancel = new() { 
                 Text = "Cancel", 
-                Left = 120, 
-                Width = 70, 
+                Left = 220, 
                 Top = 90, 
+                Width = 70, 
                 Height = 30, 
                 DialogResult = DialogResult.Cancel,
                 TextAlign = ContentAlignment.MiddleCenter,
