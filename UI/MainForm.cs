@@ -6,6 +6,8 @@ namespace PidgeonCarrier
 
     public partial class MainForm : Form
     {
+        public GameExitResult ExitResult { get; private set; } = GameExitResult.Restart;
+        
         private readonly Timer _gameTimer = new();
         private const int TargetFps = 60;
 
@@ -17,9 +19,15 @@ namespace PidgeonCarrier
 
         private int _score = 0;
 
-        public MainForm()
+        private readonly GameLevel _level;
+
+        private bool _isGameOver = false;
+
+        public MainForm(GameLevel level)
         {
             InitializeComponent();
+            _level = level;
+            ApplyLevelSettings();
 
             DoubleBuffered = true;
             KeyPreview = true;
@@ -60,6 +68,8 @@ namespace PidgeonCarrier
 
         private void UpdateGame()
         {
+            if (_isGameOver) return;
+            
             _pidgeon.Update();
 
             foreach (var tree in _trees)
@@ -72,41 +82,17 @@ namespace PidgeonCarrier
                     _score++;
                 }
 
-                if (_pidgeon.IsOutOfBounds(ClientSize.Height) ||
-                    _pidgeon.GetBounds().IntersectsWith(tree.GetTopBounds()) ||
+                if (_pidgeon.GetBounds().IntersectsWith(tree.GetTopBounds()) ||
                     _pidgeon.GetBounds().IntersectsWith(tree.GetBottomBounds()))
                 {
-                    _gameTimer.Stop();
-
-                    if (_score > 0 && HighScoreManager.IsHighScore(_score))
-                    {
-                        string playerName = Prompt.ShowDialog("New High Score! Enter your name:", "High Score");
-                        if (!string.IsNullOrWhiteSpace(playerName))
-                        {
-                            HighScoreManager.AddScore(playerName, _score);
-                        }
-                        else
-                        {
-
-                        }
-                    }
-
-                    var result = MessageBox.Show(
-                        $"Game Over! Your Score: {_score}\nDo you want to restart the game?",
-                        "Game Over",
-                        MessageBoxButtons.YesNo,
-                        MessageBoxIcon.Question
-                    );
-
-                    if (result == DialogResult.Yes)
-                    {
-                        ResetGame();
-                    }
-                    else
-                    {
-                        Close();
-                    }
+                    HandleGameOver();
+                    return;
                 }
+            }
+
+            if (_pidgeon.IsOutOfBounds(ClientSize.Height))
+            {
+                HandleGameOver();
             }
         }
 
@@ -127,6 +113,9 @@ namespace PidgeonCarrier
 
         private void ResetGame()
         {
+            _isGameOver = false;
+            _score = 0;
+
             _pidgeon = new Pidgeon(100, ClientSize.Height / 2);
 
             for (int i = 0; i < _trees.Count; i++)
@@ -134,8 +123,56 @@ namespace PidgeonCarrier
                 _trees[i].Reset(ClientSize.Width + i * TreeSpacing);
             }
 
-            _score = 0;
             _gameTimer.Start();
+        }
+
+        private void ApplyLevelSettings()
+        {
+            switch (_level)
+            {
+                case GameLevel.Classic:
+                    break;
+            }
+        }
+
+        private void HandleGameOver()
+        {
+            if (_isGameOver) return;
+
+            _isGameOver = true;
+            _gameTimer.Stop();
+
+            if (_score > 0 && HighScoreManager.IsHighScore(_score))
+            {
+                string playerName = Prompt.ShowDialog(
+                    "New High Score! Enter your name:",
+                    "High Score"
+                );
+
+                if (!string.IsNullOrWhiteSpace(playerName))
+                {
+                    HighScoreManager.AddScore(playerName, _score);
+                }
+            }
+
+            var result = MessageBox.Show(
+                $"Game Over! Your Score: {_score}\nDo you want to restart the game?",
+                "Game Over",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                ExitResult = GameExitResult.Restart;
+                ResetGame();
+            }
+            else
+            {
+                ExitResult = GameExitResult.ReturnToLevels;
+                DialogResult = DialogResult.OK;
+                Close();
+            }
         }
     }
 }

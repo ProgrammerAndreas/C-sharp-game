@@ -37,7 +37,7 @@
 
         public void Draw(Graphics g, int formHeight)
         {
-            // Top trees (remove this later)
+            // Top trees
             g.FillRectangle(Brushes.Green, X, 0, Width, TopHeight);
             // Bottom trees
             g.FillRectangle(Brushes.Green, X, TopHeight + GapHeight, Width, formHeight - (TopHeight + GapHeight));

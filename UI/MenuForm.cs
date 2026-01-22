@@ -7,21 +7,23 @@
             InitializeComponent();
         }
 
-        private void btnStartGame_Click(object sender, EventArgs e)
+        private void BtnStartGame_Click(object sender, EventArgs e)
         {
-            MainForm gameForm = new MainForm();
-            gameForm.Show();
             Hide();
-            gameForm.FormClosed += (s, args) => Show();
+
+            LevelsMenuForm levelsMenu = new();
+            levelsMenu.ShowDialog();
+
+            Show();
         }
 
-        private void btnHighScores_Click(object sender, EventArgs e)
+        private void BtnHighScores_Click(object sender, EventArgs e)
         {
             HighScoresForm highScoresForm = new HighScoresForm();
             highScoresForm.ShowDialog();
         }
 
-        private void btnExit_Click(object sender, EventArgs e)
+        private void BtnExit_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }

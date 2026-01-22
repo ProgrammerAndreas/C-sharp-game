@@ -41,7 +41,7 @@
             btnStartGame.TabIndex = 0;
             btnStartGame.Text = "Start Game";
             btnStartGame.UseVisualStyleBackColor = true;
-            btnStartGame.Click += btnStartGame_Click;
+            btnStartGame.Click += BtnStartGame_Click;
             // 
             // btnHighScores
             // 
@@ -51,7 +51,7 @@
             btnHighScores.TabIndex = 1;
             btnHighScores.Text = "High Scores";
             btnHighScores.UseVisualStyleBackColor = true;
-            btnHighScores.Click += btnHighScores_Click;
+            btnHighScores.Click += BtnHighScores_Click;
             // 
             // btnExit
             // 
@@ -61,7 +61,7 @@
             btnExit.TabIndex = 2;
             btnExit.Text = "Close Game";
             btnExit.UseVisualStyleBackColor = true;
-            btnExit.Click += btnExit_Click;
+            btnExit.Click += BtnExit_Click;
             // 
             // MenuForm
             // 
