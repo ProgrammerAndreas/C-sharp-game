@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace PidgeonCarrier.Game
+namespace PigeonCarrier.Game
 {
     public static class HighScoreManager
     {

@@ -1,4 +1,4 @@
-﻿namespace PidgeonCarrier.Game
+﻿namespace PigeonCarrier.Game
 {
     public enum GameExitResult
     {

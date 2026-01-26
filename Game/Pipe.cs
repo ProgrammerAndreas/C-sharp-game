@@ -1,19 +1,19 @@
-﻿namespace PidgeonCarrier.Game
+﻿namespace PigeonCarrier.Game
 {
     using System.Drawing;
 
-    public class Tree
+    public class Pipe
     {
         public float X { get; private set; }
         public float Width { get; } = 60;
         public float GapHeight { get; } = 150;
         public float TopHeight { get; private set; }
-        public bool IsFinishTree { get; set; } = false;
+        public bool IsFinishPipe { get; set; } = false;
         public bool HasBeenPassed { get; set; } = false;
 
         private readonly int formHeight;
 
-        public Tree(float startX, int formHeight)
+        public Pipe(float startX, int formHeight)
         {
             X = startX;
             this.formHeight = formHeight;
@@ -39,10 +39,10 @@
 
         public void Draw(Graphics g, int formHeight)
         {
-            Brush brush = IsFinishTree ? Brushes.Gold : Brushes.Green;
-            // Top trees
+            Brush brush = IsFinishPipe ? Brushes.Gold : Brushes.Green;
+            // Top pipes
             g.FillRectangle(brush, X, 0, Width, TopHeight);
-            // Bottom trees
+            // Bottom pipes
             g.FillRectangle(brush, X, TopHeight + GapHeight, Width, formHeight - (TopHeight + GapHeight));
         }
 

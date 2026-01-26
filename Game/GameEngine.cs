@@ -1,6 +1,6 @@
-using PidgeonCarrier.UI;
+using PigeonCarrier.UI;
 
-namespace PidgeonCarrier.Game
+namespace PigeonCarrier.Game
 {
     internal static class GameEngine
     {

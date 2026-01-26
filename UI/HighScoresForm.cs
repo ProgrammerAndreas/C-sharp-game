@@ -1,6 +1,6 @@
-﻿using PidgeonCarrier.Game;
+﻿using PigeonCarrier.Game;
 
-namespace PidgeonCarrier.UI
+namespace PigeonCarrier.UI
 {
     public partial class HighScoresForm : Form
     {

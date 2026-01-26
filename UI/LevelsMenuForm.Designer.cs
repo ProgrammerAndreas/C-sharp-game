@@ -1,4 +1,4 @@
-﻿namespace PidgeonCarrier.UI
+﻿namespace PigeonCarrier.UI
 {
     partial class LevelsMenuForm
     {

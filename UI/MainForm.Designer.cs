@@ -1,4 +1,4 @@
-﻿namespace PidgeonCarrier
+﻿namespace PigeonCarrier
 {
     partial class MainForm
     {

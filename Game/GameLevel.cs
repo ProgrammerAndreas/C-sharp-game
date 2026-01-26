@@ -1,8 +1,9 @@
-﻿namespace PidgeonCarrier.Game
+﻿namespace PigeonCarrier.Game
 {
     public enum GameLevel
     {
         Endless,
-        StoryMode
+        ChallengeMode,
+        LevelOne
     }
 }

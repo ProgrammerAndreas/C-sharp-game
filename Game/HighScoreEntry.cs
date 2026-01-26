@@ -1,4 +1,4 @@
-﻿namespace PidgeonCarrier.Game
+﻿namespace PigeonCarrier.Game
 {
     [Serializable]
     public class HighScoreEntry

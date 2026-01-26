@@ -1,4 +1,4 @@
-﻿namespace PidgeonCarrier.UI
+﻿namespace PigeonCarrier.UI
 {
     public partial class MenuForm : Form
     {
