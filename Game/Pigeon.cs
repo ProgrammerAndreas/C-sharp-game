@@ -1,8 +1,6 @@
-﻿using System.Drawing;
-
-namespace PidgeonCarrier.Game
+﻿namespace PigeonCarrier.Game
 {
-    public class Pidgeon
+    public class Pigeon
     {
         public PointF Position { get; private set; }
         public float Velocity { get; private set; }
@@ -10,13 +8,20 @@ namespace PidgeonCarrier.Game
         private readonly float gravity = 0.5F;
         private readonly float flapStrength = -8f;
 
-        private readonly int width = 30;
-        private readonly int height = 30;
+        private readonly int width = 70;
+        private readonly int height = 32;
 
-        public Pidgeon(float startX, float startY)
+        private readonly Image _sprite;
+
+        private const int HitboxPaddingX = 8;
+        private const int HitboxPaddingY = 6;
+
+        public Pigeon(float startX, float startY)
         {
             Position = new PointF(startX, startY);
             Velocity = 0;
+
+            _sprite = Properties.Resources.pigeon;
         }
 
         public void Update()
@@ -32,7 +37,12 @@ namespace PidgeonCarrier.Game
 
         public void Draw(Graphics g)
         {
-            g.FillEllipse(Brushes.Yellow, Position.X, Position.Y, width, height);
+            g.DrawImage(_sprite, Position.X, Position.Y, width, height);
+
+#if DEBUG
+            //using Pen pen = new(Color.Red, 1);
+            //g.DrawRectangle(pen, GetBounds());
+#endif
         }
 
         public bool IsOutOfBounds(int formHeight)
@@ -42,7 +52,11 @@ namespace PidgeonCarrier.Game
 
         public RectangleF GetBounds()
         {
-            return new RectangleF(Position.X, Position.Y, width, height);
+            return new RectangleF(
+                Position.X + HitboxPaddingX,
+                Position.Y + HitboxPaddingY,
+                width - (HitboxPaddingX * 2),
+                height - (HitboxPaddingY * 2));
         }
     }
 }

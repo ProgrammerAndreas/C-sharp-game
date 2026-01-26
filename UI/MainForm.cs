@@ -2,6 +2,7 @@ namespace PidgeonCarrier
 {
     using PidgeonCarrier.Game;
     using PidgeonCarrier.UI;
+    using PigeonCarrier.Game;
     using System.Windows.Forms;
 
     public partial class MainForm : Form
@@ -11,7 +12,7 @@ namespace PidgeonCarrier
         private readonly Timer _gameTimer = new();
         private const int TargetFps = 60;
 
-        private Pidgeon _pidgeon;
+        private Pigeon _pidgeon;
 
         private readonly List<Tree> _trees = [];
         private const float TreeSpeed = 4f;
@@ -242,7 +243,7 @@ namespace PidgeonCarrier
             _score = 0;
             _treesPassed = 0;
 
-            _pidgeon = new Pidgeon(100, ClientSize.Height / 2);
+            _pidgeon = new Pigeon(100, ClientSize.Height / 2);
 
             _trees.Clear();
 
