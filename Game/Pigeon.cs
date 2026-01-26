@@ -13,9 +13,6 @@
 
         private readonly Image _sprite;
 
-        private const int HitboxPaddingX = 8;
-        private const int HitboxPaddingY = 6;
-
         public Pigeon(float startX, float startY)
         {
             Position = new PointF(startX, startY);
@@ -41,7 +38,10 @@
 
 #if DEBUG
             //using Pen pen = new(Color.Red, 1);
-            //g.DrawRectangle(pen, GetBounds());
+            //foreach (var hitbox in GetHitBoxes())
+            //{
+            //    g.DrawRectangle(pen, hitbox);
+            //}
 #endif
         }
 
@@ -50,13 +50,31 @@
             return Position.Y < 0 || Position.Y + height > formHeight;
         }
 
-        public RectangleF GetBounds()
+        public IEnumerable<RectangleF> GetHitBoxes()
         {
-            return new RectangleF(
-                Position.X + HitboxPaddingX,
-                Position.Y + HitboxPaddingY,
-                width - (HitboxPaddingX * 2),
-                height - (HitboxPaddingY * 2));
+            // Body hitbox
+            yield return new RectangleF(
+                Position.X + 15,
+                Position.Y,
+                width - 35,
+                height
+            );
+
+            // Head hitbox
+            yield return new RectangleF(
+                Position.X + width - 18,
+                Position.Y + 17,
+                14,
+                height - 24
+            );
+
+            // Tail hitbox
+            yield return new RectangleF(
+                Position.X + width - 70,
+                Position.Y + 25,
+                14,
+                height - 24
+            );
         }
     }
 }

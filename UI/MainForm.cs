@@ -12,7 +12,7 @@ namespace PidgeonCarrier
         private readonly Timer _gameTimer = new();
         private const int TargetFps = 60;
 
-        private Pigeon _pidgeon;
+        private Pigeon _pigeon;
 
         private readonly List<Tree> _trees = [];
         private const float TreeSpeed = 4f;
@@ -54,7 +54,7 @@ namespace PidgeonCarrier
 
             if (e.KeyCode == Keys.Space)
             {
-                _pidgeon.Flap();
+                _pigeon.Flap();
             }
         }
 
@@ -68,7 +68,7 @@ namespace PidgeonCarrier
         {
             if (_isGameOver) return;
             
-            _pidgeon.Update();
+            _pigeon.Update();
 
             foreach (var tree in _trees)
             {
@@ -84,28 +84,31 @@ namespace PidgeonCarrier
                 }
                 else if (_level == GameLevel.StoryMode)
                 {
-                    if (!tree.IsFinishTree && !tree.HasBeenPassed && tree.X + tree.Width == _pidgeon.Position.X)
+                    if (!tree.IsFinishTree && !tree.HasBeenPassed && tree.X + tree.Width == _pigeon.Position.X)
                     {
                         _treesPassed++;
                         tree.HasBeenPassed = true;
                     }
 
-                    if (tree.IsFinishTree && tree.X + tree.Width == _pidgeon.Position.X)
+                    if (tree.IsFinishTree && tree.X + tree.Width == _pigeon.Position.X)
                     {
                         HandleLevelComplete();
                         return;
                     }
                 }
 
-                if (_pidgeon.GetBounds().IntersectsWith(tree.GetTopBounds()) ||
-                    _pidgeon.GetBounds().IntersectsWith(tree.GetBottomBounds()))
+                foreach (var hitbox in _pigeon.GetHitBoxes())
                 {
-                    HandleGameOver();
-                    return;
+                    if (hitbox.IntersectsWith(tree.GetTopBounds()) ||
+                        hitbox.IntersectsWith(tree.GetBottomBounds()))
+                    {
+                        HandleGameOver();
+                        return;
+                    }
                 }
             }
 
-            if (_pidgeon.IsOutOfBounds(ClientSize.Height))
+            if (_pigeon.IsOutOfBounds(ClientSize.Height))
             {
                 HandleGameOver();
                 return;
@@ -116,7 +119,7 @@ namespace PidgeonCarrier
         {
             graphics.Clear(Color.SkyBlue);
 
-            _pidgeon.Draw(graphics);
+            _pigeon.Draw(graphics);
 
             foreach (var tree in _trees)
             {
@@ -243,7 +246,7 @@ namespace PidgeonCarrier
             _score = 0;
             _treesPassed = 0;
 
-            _pidgeon = new Pigeon(100, ClientSize.Height / 2);
+            _pigeon = new Pigeon(100, ClientSize.Height / 2);
 
             _trees.Clear();
 
