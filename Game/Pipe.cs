@@ -2,58 +2,69 @@
 {
     using System.Drawing;
 
-    public class Pipe
+    public class Pipe : Obstacle
     {
-        public float X { get; private set; }
-        public float Width { get; } = 60;
-        public float GapHeight { get; } = 150;
-        public float TopHeight { get; private set; }
-        public bool IsFinishPipe { get; set; } = false;
-        public bool HasBeenPassed { get; set; } = false;
+        public int GapHeight { get; } = 150;
+        public int TopHeight { get; private set; }
 
-        private readonly int formHeight;
+        private readonly int _clientHeight;
+        private static readonly Random _rand = new();
 
-        public Pipe(float startX, int formHeight)
+        public Pipe(int x, int clientHeight)
+            : base(x, 60)
         {
-            X = startX;
-            this.formHeight = formHeight;
+            _clientHeight = clientHeight;
             RandomizeHeight();
-        }
-
-        public void Update(float speed)
-        {
-            X -= speed;
         }
 
         public void RandomizeHeight()
         {
-            Random rand = new();
-            TopHeight = rand.Next(50, formHeight - 50 - (int)GapHeight);
+            TopHeight = _rand.Next(50, _clientHeight - 50 - (int)GapHeight);
         }
 
-        public void Reset(float newX)
+        public override void Reset(int startX)
         {
-            X = newX;
+            base.Reset(startX);
+            HasBeenPassed = false;
             RandomizeHeight();
         }
 
-        public void Draw(Graphics g, int formHeight)
+        public override void Draw(Graphics g, int clientHeight)
         {
-            Brush brush = IsFinishPipe ? Brushes.Gold : Brushes.Green;
+            Brush brush = IsFinish ? Brushes.Gold : Brushes.Green;
             // Top pipes
             g.FillRectangle(brush, X, 0, Width, TopHeight);
             // Bottom pipes
-            g.FillRectangle(brush, X, TopHeight + GapHeight, Width, formHeight - (TopHeight + GapHeight));
+            g.FillRectangle(brush, X, TopHeight + GapHeight, Width, _clientHeight - (TopHeight + GapHeight));
         }
 
-        public RectangleF GetTopBounds()
+        public override bool CollidesWith(Pigeon pigeon)
+        {
+            foreach (var hitbox in pigeon.GetHitBoxes())
+            {
+                if (hitbox.IntersectsWith(GetTopBounds()) ||
+                    hitbox.IntersectsWith(GetBottomBounds()))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private RectangleF GetTopBounds()
         {
             return new RectangleF(X, 0, Width, TopHeight);
         }
 
-        public RectangleF GetBottomBounds()
+        private RectangleF GetBottomBounds()
         {
-            return new RectangleF(X, TopHeight + GapHeight, Width, formHeight - (TopHeight + GapHeight));
+            return new RectangleF(
+                X,
+                TopHeight + GapHeight,
+                Width,
+                _clientHeight - (TopHeight + GapHeight)
+            );
         }
     }
 }

@@ -13,14 +13,14 @@ namespace PigeonCarrier
 
         private Pigeon _pigeon;
 
-        private readonly List<Pipe> _pipes = [];
+        private readonly List<Obstacle> _obstacles = [];
         private const float PipeSpeed = 4f;
         private const int PipeSpacing = 300;
 
         private int _score = 0;
 
         private readonly GameLevel _level;
-        private int _pipesPassed;
+        private int _obstaclesPassed;
         private int _obstaclesToPass;
 
         private bool _isGameOver = false;
@@ -52,6 +52,7 @@ namespace PigeonCarrier
             }
 
             _gameTimer.Interval = 1000 / TargetFps;
+            _gameTimer.Tick -= GameLoop;
             _gameTimer.Tick += GameLoop;
             _gameTimer.Start();
         }
@@ -84,67 +85,42 @@ namespace PigeonCarrier
             
             _pigeon.Update();
 
-            foreach (var pipe in _pipes)
+            foreach (var obstacle in _obstacles)
             {
-                pipe.Update(PipeSpeed);
+                obstacle.Update(PipeSpeed);
 
-                if (_level == GameLevel.Endless)
+                if (_level == GameLevel.Endless && obstacle.X + obstacle.Width < 0)
                 {
-                    if (pipe.X + pipe.Width < 0)
-                    {
-                        pipe.Reset(ClientSize.Width);
-                        _score++;
-                    }
+                    obstacle.Reset(ClientSize.Width);
+                    _score++;
+                    continue;
                 }
-                else if (_level == GameLevel.ChallengeMode)
-                {
-                    if (!pipe.IsFinishPipe && !pipe.HasBeenPassed && pipe.X + pipe.Width == _pigeon.Position.X)
-                    {
-                        _pipesPassed++;
-                        pipe.HasBeenPassed = true;
-                    }
 
-                    if (pipe.IsFinishPipe && pipe.X + pipe.Width == _pigeon.Position.X)
+                if (!obstacle.HasBeenPassed &&
+                    obstacle.X + obstacle.Width < _pigeon.Position.X)
+                {
+                    obstacle.HasBeenPassed = true;
+
+                    if (_level != GameLevel.Endless)
+                        _obstaclesPassed++;
+
+                    if (obstacle.IsFinish)
                     {
                         HandleLevelComplete();
                         return;
                     }
                 }
-                else if (_level == GameLevel.LevelOne)
+
+                if (obstacle.CollidesWith(_pigeon))
                 {
-                    foreach (var obstacle in _pipes)
-                    {
-                        obstacle.Update(PipeSpeed);
-
-                        if (!pipe.IsFinishPipe && !pipe.HasBeenPassed && pipe.X + pipe.Width == _pigeon.Position.X)
-                        {
-                            _pipesPassed++;
-                            pipe.HasBeenPassed = true;
-                        }
-
-                        if (pipe.IsFinishPipe && pipe.X + pipe.Width == _pigeon.Position.X)
-                        {
-                            HandleLevelComplete();
-                            return;
-                        }
-                    }
-                }
-
-                foreach (var hitbox in _pigeon.GetHitBoxes())
-                {
-                    if (hitbox.IntersectsWith(pipe.GetTopBounds()) ||
-                        hitbox.IntersectsWith(pipe.GetBottomBounds()))
-                    {
-                        HandleGameOver();
-                        return;
-                    }
+                    HandleGameOver();
+                    return;
                 }
             }
 
             if (_pigeon.IsOutOfBounds(ClientSize.Height))
             {
                 HandleGameOver();
-                return;
             }
         }
 
@@ -154,9 +130,9 @@ namespace PigeonCarrier
 
             _pigeon.Draw(graphics);
 
-            foreach (var tree in _pipes)
+            foreach (var obstacle in _obstacles)
             {
-                tree.Draw(graphics, ClientSize.Height);
+                obstacle.Draw(graphics, ClientSize.Height);
             }
 
             if (_level == GameLevel.Endless)
@@ -277,7 +253,7 @@ namespace PigeonCarrier
 
         private void DrawCountDown(Graphics graphics)
         {
-            int remaining = Math.Max(0, _obstaclesToPass - _pipesPassed);
+            int remaining = Math.Max(0, _obstaclesToPass - _obstaclesPassed);
 
             Font font = new("Arial", 24, FontStyle.Bold);
             graphics.DrawString(
@@ -292,8 +268,8 @@ namespace PigeonCarrier
         private void SetUpPipesLevel()
         {
             _isGameOver = false;
-            _pipes.Clear();
-            _pipesPassed = 0;
+            _obstacles.Clear();
+            _obstaclesPassed = 0;
 
             _pigeon = new Pigeon(100, ClientSize.Height / 2);
 
@@ -302,41 +278,41 @@ namespace PigeonCarrier
                 var pipe = new Pipe(ClientSize.Width + i * PipeSpacing, ClientSize.Height);
 
                 if (i == _obstaclesToPass - 1)
-                    pipe.IsFinishPipe = true;
+                    pipe.IsFinish = true;
 
                 pipe.HasBeenPassed = false;
-                _pipes.Add(pipe);
+                _obstacles.Add(pipe);
             }
         }
 
         private void SetUpLevelOne()
         {
             _isGameOver = false;
-            _pipes.Clear();
-            _pipesPassed = 0;
+            _obstacles.Clear();
+            _obstaclesPassed = 0;
 
             _pigeon = new Pigeon(100, ClientSize.Height / 2);
 
             for (int i = 0; i < _obstaclesToPass; i++)
             {
-                _pipes.Add(new Pipe(ClientSize.Width + i * PipeSpacing, ClientSize.Height));
+                _obstacles.Add(new Tree(ClientSize.Width + i * PipeSpacing, ClientSize.Height));
             }
 
-            if (_pipes.Count > 0)
-                _pipes[^1].IsFinishPipe = true;
+            if (_obstacles.Count > 0)
+                _obstacles[^1].IsFinish = true;
         }
 
         private void SetUpEndlessLevel()
         {
             _isGameOver = false;
-            _pipes.Clear();
+            _obstacles.Clear();
             _score = 0;
 
             _pigeon = new Pigeon(100, ClientSize.Height / 2);
 
             for (int i = 0; i < 3; i++)
             {
-                _pipes.Add(new Pipe(ClientSize.Width + i * PipeSpacing, ClientSize.Height));
+                _obstacles.Add(new Pipe(ClientSize.Width + i * PipeSpacing, ClientSize.Height));
             }
         }
     }
