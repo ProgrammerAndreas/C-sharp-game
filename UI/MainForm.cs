@@ -280,7 +280,7 @@ namespace PigeonCarrier
             _gameTimer.Stop();
 
             MessageBox.Show(
-                "Level Complete!\nYou reached the end!",
+                "Level Complete!\nYou have won!",
                 "Victory",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information
