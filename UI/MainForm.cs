@@ -14,8 +14,9 @@ namespace PigeonCarrier
         private Pigeon _pigeon;
 
         private readonly List<Obstacle> _obstacles = [];
-        private const float PipeSpeed = 4f;
-        private const int PipeSpacing = 300;
+        private const float ObstacleSpeed = 4f;
+        
+        private const int ObstacleSpacing = 300;
 
         private int _score = 0;
 
@@ -24,6 +25,13 @@ namespace PigeonCarrier
         private int _obstaclesToPass;
 
         private bool _isGameOver = false;
+
+        private readonly List<Envelope> _envelopes = [];
+        private int _envelopesRequired;
+        private int _envelopesCollected = 0;
+
+        private bool _lastGapHadEnvelope = false;
+        private Random _rand = new();
 
         public MainForm(GameLevel level, int obstaclesToPass = 0)
         {
@@ -85,36 +93,85 @@ namespace PigeonCarrier
             
             _pigeon.Update();
 
+            if (_level == GameLevel.LevelOne)
+            {
+                _envelopes.RemoveAll(e => e.Bounds.X + e.Bounds.Width < 0);
+
+                foreach (var envelope in _envelopes)
+                {
+                    envelope.Update(ObstacleSpeed);
+
+                    if (envelope.Collected) continue;
+
+                    foreach (var hitbox in _pigeon.GetHitBoxes())
+                    {
+                        if (envelope.TryCollect(hitbox))
+                        {
+                            _envelopesCollected++;
+                            break;
+                        }
+                    }
+                }
+
+                var lastTree = _obstacles.Last();
+                if (lastTree.X + lastTree.Width < ClientSize.Width)
+                {
+                    var newTree = new Tree(lastTree.X + ObstacleSpacing, ClientSize.Height);
+                    _obstacles.Add(newTree);
+
+                    bool placeEnvelope = !_lastGapHadEnvelope && _envelopes.Count < _envelopesRequired && _rand.NextDouble() < 0.5;
+                    if (placeEnvelope)
+                    {
+                        int envelopeX = lastTree.X + ObstacleSpacing / 2;
+                        int envelopeY = ClientSize.Height - 80 - _rand.Next(0, 30);
+                        _envelopes.Add(new Envelope(envelopeX, envelopeY));
+                        _lastGapHadEnvelope = true;
+                    }
+                    else
+                    {
+                        _lastGapHadEnvelope = false;
+                    }
+
+                    if (_envelopesCollected >= _envelopesRequired)
+                    {
+                        newTree.IsFinish = true;
+                    }
+                }
+
+                if (_envelopesCollected >= _envelopesRequired && _obstacles.Last().IsFinish)
+                {
+                    HandleLevelComplete();
+                    return;
+                }
+            }
+
             foreach (var obstacle in _obstacles)
             {
-                obstacle.Update(PipeSpeed);
+                obstacle.Update(ObstacleSpeed);
 
                 if (_level == GameLevel.Endless && obstacle.X + obstacle.Width < 0)
                 {
-                    obstacle.Reset(ClientSize.Width);
+                    int maxX = _obstacles.Max(t => t.X);
+                    obstacle.Reset(maxX + ObstacleSpacing);
                     _score++;
-                    continue;
-                }
-
-                if (!obstacle.HasBeenPassed &&
-                    obstacle.X + obstacle.Width < _pigeon.Position.X)
-                {
-                    obstacle.HasBeenPassed = true;
-
-                    if (_level != GameLevel.Endless)
-                        _obstaclesPassed++;
-
-                    if (obstacle.IsFinish)
-                    {
-                        HandleLevelComplete();
-                        return;
-                    }
                 }
 
                 if (obstacle.CollidesWith(_pigeon))
                 {
                     HandleGameOver();
                     return;
+                }
+
+                if (_level != GameLevel.LevelOne && !obstacle.HasBeenPassed && obstacle.X + obstacle.Width < _pigeon.Position.X)
+                {
+                    obstacle.HasBeenPassed = true;
+                    _obstaclesPassed++;
+
+                    if (obstacle.IsFinish)
+                    {
+                        HandleLevelComplete();
+                        return;
+                    }
                 }
             }
 
@@ -142,6 +199,13 @@ namespace PigeonCarrier
             else if (_level == GameLevel.ChallengeMode)
             {
                 DrawCountDown(graphics);
+            }
+            else if (_level == GameLevel.LevelOne)
+            {
+                foreach (var letter in _envelopes)
+                    letter.Draw(graphics);
+
+                DrawLetterProgress(graphics);
             }
         }
 
@@ -275,7 +339,7 @@ namespace PigeonCarrier
 
             for (int i = 0; i < _obstaclesToPass; i++)
             {
-                var pipe = new Pipe(ClientSize.Width + i * PipeSpacing, ClientSize.Height);
+                var pipe = new Pipe(ClientSize.Width + i * ObstacleSpacing, ClientSize.Height);
 
                 if (i == _obstaclesToPass - 1)
                     pipe.IsFinish = true;
@@ -288,18 +352,25 @@ namespace PigeonCarrier
         private void SetUpLevelOne()
         {
             _isGameOver = false;
+            
             _obstacles.Clear();
-            _obstaclesPassed = 0;
+            _envelopes.Clear();
+
+            _envelopesRequired = 5;
+            _envelopesCollected = 0;
 
             _pigeon = new Pigeon(100, ClientSize.Height / 2);
 
-            for (int i = 0; i < _obstaclesToPass; i++)
+            int initialTreeCount = 5;
+            for (int i = 0; i < initialTreeCount; i++)
             {
-                _obstacles.Add(new Tree(ClientSize.Width + i * PipeSpacing, ClientSize.Height));
+                var tree = new Tree(ClientSize.Width + i * ObstacleSpacing, ClientSize.Height);
+                _obstacles.Add(tree);
             }
 
-            if (_obstacles.Count > 0)
-                _obstacles[^1].IsFinish = true;
+            _obstacles[^1].IsFinish = true;
+
+            _lastGapHadEnvelope = false;
         }
 
         private void SetUpEndlessLevel()
@@ -312,8 +383,20 @@ namespace PigeonCarrier
 
             for (int i = 0; i < 3; i++)
             {
-                _obstacles.Add(new Pipe(ClientSize.Width + i * PipeSpacing, ClientSize.Height));
+                _obstacles.Add(new Pipe(ClientSize.Width + i * ObstacleSpacing, ClientSize.Height));
             }
+        }
+
+        private void DrawLetterProgress(Graphics g)
+        {
+            Font font = new("Arial", 18, FontStyle.Bold);
+            g.DrawString(
+                $"Envelopes: {_envelopesCollected}/{_envelopesRequired}",
+                font,
+                Brushes.Black,
+                10,
+                10
+            );
         }
     }
 }

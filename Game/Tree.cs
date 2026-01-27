@@ -3,14 +3,16 @@ namespace PigeonCarrier.Game
 {
     public class Tree : Obstacle
     {
-        private readonly int _height;
+        private static readonly Random _rand = new();
+        
+        private int _height;
         private readonly int _groundY;
 
         public Tree(int x, int groundY)
             : base(x, 50)
         {
             _groundY = groundY;
-            _height = 120;
+            RandomizeHeight();
         }
 
         public override void Draw(Graphics g, int clientHeight)
@@ -35,6 +37,17 @@ namespace PigeonCarrier.Game
             }
 
             return false;
+        }
+
+        public override void Reset(int startX)
+        {
+            base.Reset(startX);
+            RandomizeHeight();
+        }
+
+        private void RandomizeHeight()
+        {
+            _height = _rand.Next(80, 180);
         }
     }
 }

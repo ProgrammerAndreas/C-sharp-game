@@ -63,6 +63,16 @@ namespace PigeonCarrier.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap envelope {
+            get {
+                object obj = ResourceManager.GetObject("envelope", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap pigeon {
             get {
                 object obj = ResourceManager.GetObject("pigeon", resourceCulture);
