@@ -57,7 +57,7 @@
                 Position.X + 15,
                 Position.Y,
                 width - 35,
-                height
+                height - 3
             );
 
             // Head hitbox
@@ -73,7 +73,7 @@
                 Position.X + width - 70,
                 Position.Y + 25,
                 14,
-                height - 24
+                height - 25
             );
         }
     }

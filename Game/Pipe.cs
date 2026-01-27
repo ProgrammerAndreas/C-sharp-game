@@ -19,7 +19,7 @@
 
         public void RandomizeHeight()
         {
-            TopHeight = _rand.Next(50, _clientHeight - 50 - (int)GapHeight);
+            TopHeight = _rand.Next(50, _clientHeight - 50 - GapHeight);
         }
 
         public override void Reset(int startX)

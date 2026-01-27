@@ -31,14 +31,13 @@ namespace PigeonCarrier
         private int _envelopesCollected = 0;
 
         private bool _lastGapHadEnvelope = false;
-        private Random _rand = new();
+        private readonly Random _rand = new();
 
         public MainForm(GameLevel level, int obstaclesToPass = 0)
         {
             InitializeComponent();
             _level = level;
             _obstaclesToPass = obstaclesToPass;
-            ApplyLevelSettings();
 
             DoubleBuffered = true;
             KeyPreview = true;
@@ -229,24 +228,6 @@ namespace PigeonCarrier
                 _gameTimer.Start();
 
             Invalidate();
-        }
-
-        private void ApplyLevelSettings()
-        {
-            switch (_level)
-            {
-                case GameLevel.Endless:
-                    _obstaclesToPass = int.MaxValue;
-                    break;
-
-                case GameLevel.ChallengeMode:
-                    _obstaclesToPass = 10;
-                    break;
-
-                case GameLevel.LevelOne:
-                    _obstaclesToPass = 20;
-                    break;
-            }
         }
 
         private void HandleGameOver()
