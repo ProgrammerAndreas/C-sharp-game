@@ -1,5 +1,6 @@
-﻿namespace PigeonCarrier.Game
+﻿namespace PigeonCarrier.Game.Obstacles
 {
+    using PigeonCarrier.Game.Items;
     using System.Drawing;
 
     public class Pipe : Obstacle

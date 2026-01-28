@@ -72,6 +72,7 @@
             Controls.Add(btnHighScores);
             Controls.Add(btnStartGame);
             Name = "MenuForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "MenuForm";
             ResumeLayout(false);
         }

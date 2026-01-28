@@ -70,6 +70,7 @@
             Controls.Add(btnPlay);
             Controls.Add(lstLevels);
             Name = "LevelsMenuForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "LevelsMenuForm";
             ResumeLayout(false);
         }

@@ -1,4 +1,6 @@
-﻿namespace PigeonCarrier.Game
+﻿using PigeonCarrier.Game.Items;
+
+namespace PigeonCarrier.Game.Obstacles
 {
     public abstract class Obstacle
     {

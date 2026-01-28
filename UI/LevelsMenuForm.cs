@@ -1,4 +1,5 @@
 ﻿using PigeonCarrier.Game;
+using PigeonCarrier.Game.Enums;
 
 namespace PigeonCarrier.UI
 {
@@ -7,47 +8,41 @@ namespace PigeonCarrier.UI
         public LevelsMenuForm()
         {
             InitializeComponent();
+            PopulateLevels();
+        }
 
-            lstLevels.Items.Add("Endless");
-            lstLevels.Items.Add("ChallengeMode");
-            lstLevels.Items.Add("Level 1");
-            lstLevels.SelectedIndex = 0;
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            PopulateLevels();
         }
 
         private void BtnPlay_Click(object sender, EventArgs e)
         {
             MainForm gameForm;
 
-            if (lstLevels.SelectedIndex == 0)
+            switch (lstLevels.SelectedIndex)
             {
-                gameForm = new MainForm(GameLevel.Endless);
-            }
-            else if (lstLevels.SelectedIndex == 1)
-            {
-                int pipesToBeat = GetNumberOfPipes();
-
-                gameForm = new(GameLevel.ChallengeMode, pipesToBeat);
-            }
-            else if (lstLevels.SelectedIndex >= 2)
-            {
-                int levelIndex = lstLevels.SelectedIndex - 1;
-                StoryLevel levelData = StoryManager.Levels[levelIndex];
-
-                gameForm = new MainForm(levelData.Type, levelData.ObstaclesToPass);
-            }
-            else
-            {
-                gameForm = new MainForm(GameLevel.Endless);
+                case 0:
+                    gameForm = new MainForm(GameLevel.Endless);
+                    break;
+                case 1:
+                    int pipesToBeat = GetNumberOfPipes();
+                    gameForm = new MainForm(GameLevel.ChallengeMode, pipesToBeat);
+                    break;
+                case 2:
+                    gameForm = new MainForm(GameLevel.LevelOne);
+                    break;
+                case 3:
+                    gameForm = new MainForm(GameLevel.LevelTwo);
+                    break;
+                default:
+                    return;
             }
 
             Hide();
             gameForm.ShowDialog();
             Show();
-
-            if (gameForm.ExitResult == GameExitResult.ReturnToLevels)
-            {
-                return;
-            }
         }
 
         private void BtnBack_Click(object sender, EventArgs e)
@@ -55,7 +50,7 @@ namespace PigeonCarrier.UI
             Close();
         }
 
-        private int GetNumberOfPipes()
+        private static int GetNumberOfPipes()
         {
             string input = Prompt.ShowDialog(
                 "Enter the number of pipes to beat:",
@@ -66,6 +61,20 @@ namespace PigeonCarrier.UI
                 return num;
 
             return 10;
+        }
+
+        private void PopulateLevels()
+        {
+            lstLevels.Items.Clear();
+
+            lstLevels.Items.Add("Endless");
+            lstLevels.Items.Add("ChallengeMode");
+            lstLevels.Items.Add("Level 1");
+
+            if (StoryManager.CurrentStoryLevel >= 1)
+                lstLevels.Items.Add("Level 2");
+
+            lstLevels.SelectedIndex = 0;
         }
     }
 }

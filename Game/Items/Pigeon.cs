@@ -1,4 +1,4 @@
-﻿namespace PigeonCarrier.Game
+﻿namespace PigeonCarrier.Game.Items
 {
     public class Pigeon
     {

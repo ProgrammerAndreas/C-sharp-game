@@ -36,6 +36,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
             Name = "MainForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Pidgeon Carrier";
             ResumeLayout(false);
         }

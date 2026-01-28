@@ -1,5 +1,6 @@
-﻿
-namespace PigeonCarrier.Game
+﻿using PigeonCarrier.Game.Items;
+
+namespace PigeonCarrier.Game.Obstacles
 {
     public class Tree : Obstacle
     {

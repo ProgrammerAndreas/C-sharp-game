@@ -47,6 +47,7 @@
             ClientSize = new Size(800, 450);
             Controls.Add(lstHighScores);
             Name = "HighScoresForm";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "HighScoresForm";
             ResumeLayout(false);
         }
