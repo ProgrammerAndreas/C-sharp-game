@@ -73,7 +73,7 @@
                 Position.X + width - 70,
                 Position.Y + 25,
                 14,
-                height - 25
+                height - 26
             );
         }
     }

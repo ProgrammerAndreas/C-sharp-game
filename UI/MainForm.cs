@@ -36,6 +36,8 @@ namespace PigeonCarrier
         private bool _lastGapHadEnvelope = false;
         private readonly Random _rand = new();
 
+        private int _gapsSinceLastEnvelope = 0;
+
         public MainForm(GameLevel level, int obstaclesToPass = 0)
         {
             InitializeComponent();
@@ -96,130 +98,106 @@ namespace PigeonCarrier
         private void UpdateGame()
         {
             if (_isGameOver) return;
-            
+
             _pigeon.Update();
 
-            if (_level == GameLevel.LevelOne)
+            switch (_level)
             {
-                _envelopes.RemoveAll(e => e.Bounds.X + e.Bounds.Width < 0);
+                case GameLevel.LevelOne:
+                    UpdateEnvelopes(_envelopes, 80, 30, _level, _obstacles.Last());
+                    UpdateLevelOneObstacles();
+                    break;
+                case GameLevel.LevelTwo:
+                    UpdateEnvelopes(_envelopes, 120, 40, _level, _obstacles.Last());
+                    UpdateLevelTwoObstacles();
+                    break;
+            }
 
-                foreach (var envelope in _envelopes)
+            UpdateObstacles();
+
+            if (_pigeon.IsOutOfBounds(ClientSize.Height))
+                HandleGameOver();
+        }
+
+        private void UpdateEnvelopes(List<Envelope> envelopes, int baseHeight, int randomY, GameLevel level, Obstacle? lastObstacle = null)
+        {
+            envelopes.RemoveAll(e => e.Bounds.X + e.Bounds.Width < 0);
+
+            foreach (var envelope in envelopes)
+            {
+                envelope.Update(ObstacleSpeed);
+                if (envelope.Collected) continue;
+
+                foreach (var hitbox in _pigeon.GetHitBoxes())
                 {
-                    envelope.Update(ObstacleSpeed);
-
-                    if (envelope.Collected) continue;
-
-                    foreach (var hitbox in _pigeon.GetHitBoxes())
+                    if (envelope.TryCollect(hitbox))
                     {
-                        if (envelope.TryCollect(hitbox))
-                        {
-                            _envelopesCollected++;
-                            break;
-                        }
+                        _envelopesCollected++;
+                        break;
                     }
-                }
-
-                var lastTree = _obstacles.Last();
-                if (lastTree.X + lastTree.Width < ClientSize.Width)
-                {
-                    var newTree = new Tree(lastTree.X + ObstacleSpacing, ClientSize.Height);
-                    _obstacles.Add(newTree);
-
-                    bool placeEnvelope = !_lastGapHadEnvelope && _envelopes.Count < _envelopesRequired && _rand.NextDouble() < 0.5;
-                    if (placeEnvelope)
-                    {
-                        int envelopeX = lastTree.X + ObstacleSpacing / 2;
-                        int envelopeY = ClientSize.Height - 80 - _rand.Next(0, 30);
-                        _envelopes.Add(new Envelope(envelopeX, envelopeY));
-                        _lastGapHadEnvelope = true;
-                    }
-                    else
-                    {
-                        _lastGapHadEnvelope = false;
-                    }
-
-                    if (_envelopesCollected >= _envelopesRequired)
-                    {
-                        newTree.IsFinish = true;
-                    }
-                }
-
-                if (_envelopesCollected >= _envelopesRequired && _obstacles.Last().IsFinish)
-                {
-                    HandleLevelComplete();
-                    return;
                 }
             }
 
-            if (_level == GameLevel.LevelTwo)
+            if (lastObstacle != null && lastObstacle.X + lastObstacle.Width < ClientSize.Width)
             {
-                _envelopes.RemoveAll(e => e.Bounds.X + e.Bounds.Width < 0);
+                bool canPlaceEnvelope = _gapsSinceLastEnvelope >= 1 && envelopes.Count < _envelopesRequired;
 
-                foreach (var envelope in _envelopes)
+                if (canPlaceEnvelope && _rand.NextDouble() < 0.5)
                 {
-                    envelope.Update(ObstacleSpeed);
+                    int nextObstacleX = lastObstacle.X + ObstacleSpacing;
+                    int minX = lastObstacle.X + lastObstacle.Width + 10;
+                    int maxX = nextObstacleX - 10;
 
-                    if (envelope.Collected) continue;
-
-                    foreach (var hitbox in _pigeon.GetHitBoxes())
+                    if (maxX > minX)
                     {
-                        if (envelope.TryCollect(hitbox))
-                        {
-                            _envelopesCollected++;
-                            break;
-                        }
+                        int envelopeX = level == GameLevel.LevelOne ? lastObstacle.X + ObstacleSpacing / 2 : _rand.Next(minX, maxX);
+                        int envelopeY = ClientSize.Height - baseHeight - _rand.Next(0, randomY);
+
+                        envelopes.Add(new Envelope(envelopeX, envelopeY));
+                        _gapsSinceLastEnvelope = 0; // reset
                     }
                 }
-
-                var lastMountain = _obstacles.Last();
-
-                if (lastMountain.X + lastMountain.Width < ClientSize.Width)
+                else
                 {
-                    var newMountain = new Mountain(
-                        lastMountain.X + ObstacleSpacing,
-                        ClientSize.Height
-                    );
-
-                    _obstacles.Add(newMountain);
-
-                    bool placeEnvelope =
-                        !_lastGapHadEnvelope &&
-                        _envelopes.Count < _envelopesRequired &&
-                        _rand.NextDouble() < 0.5;
-
-                    if (placeEnvelope)
-                    {
-                        int minX = lastMountain.X + lastMountain.Width + 10;
-                        int envelopeWidth = _envelopes.Any() ? (int)_envelopes.Last().Bounds.Width : 24;
-                        int maxX = newMountain.X - 10 - envelopeWidth; 
-
-                        if (maxX > minX)
-                        {
-                            int envelopeX = _rand.Next(minX, maxX);
-                            int envelopeY = ClientSize.Height - 120 - _rand.Next(0, 40);
-
-                            _envelopes.Add(new Envelope(envelopeX, envelopeY));
-                        }
-
-                        _lastGapHadEnvelope = true;
-                    }
-                    else
-                    {
-                        _lastGapHadEnvelope = false;
-                    }
-
-                    if (_envelopesCollected >= _envelopesRequired)
-                        newMountain.IsFinish = true;
-                }
-
-                if (_envelopesCollected >= _envelopesRequired &&
-                    _obstacles.Last().IsFinish)
-                {
-                    HandleLevelComplete();
-                    return;
+                    _gapsSinceLastEnvelope++;
                 }
             }
+        }
 
+        private void UpdateLevelOneObstacles()
+        {
+            var lastTree = _obstacles.Last();
+            if (lastTree.X + lastTree.Width < ClientSize.Width)
+            {
+                var newTree = new Tree(lastTree.X + ObstacleSpacing, ClientSize.Height);
+                _obstacles.Add(newTree);
+
+                if (_envelopesCollected >= _envelopesRequired)
+                    newTree.IsFinish = true;
+            }
+
+            if (_envelopesCollected >= _envelopesRequired && _obstacles.Last().IsFinish)
+                HandleLevelComplete();
+        }
+
+        private void UpdateLevelTwoObstacles()
+        {
+            var lastMountain = _obstacles.Last();
+            if (lastMountain.X + lastMountain.Width < ClientSize.Width)
+            {
+                var newMountain = new Mountain(lastMountain.X + ObstacleSpacing, ClientSize.Height);
+                _obstacles.Add(newMountain);
+
+                if (_envelopesCollected >= _envelopesRequired)
+                    newMountain.IsFinish = true;
+            }
+
+            if (_envelopesCollected >= _envelopesRequired && _obstacles.Last().IsFinish)
+                HandleLevelComplete();
+        }
+
+        private void UpdateObstacles()
+        {
             foreach (var obstacle in _obstacles)
             {
                 obstacle.Update(ObstacleSpeed);
@@ -237,7 +215,8 @@ namespace PigeonCarrier
                     return;
                 }
 
-                if (_level != GameLevel.LevelOne && _level != GameLevel.LevelTwo && !obstacle.HasBeenPassed && obstacle.X + obstacle.Width < _pigeon.Position.X)
+                if (_level != GameLevel.LevelOne && _level != GameLevel.LevelTwo &&
+                    !obstacle.HasBeenPassed && obstacle.X + obstacle.Width < _pigeon.Position.X)
                 {
                     obstacle.HasBeenPassed = true;
                     _obstaclesPassed++;
@@ -249,12 +228,8 @@ namespace PigeonCarrier
                     }
                 }
             }
-
-            if (_pigeon.IsOutOfBounds(ClientSize.Height))
-            {
-                HandleGameOver();
-            }
         }
+
 
         private void DrawGame(Graphics graphics)
         {
