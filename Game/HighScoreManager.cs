@@ -34,5 +34,16 @@ namespace PigeonCarrier.Game
             if (scores.Count < MaxScores) return true;
             return score > scores.Min(s => s.Score);
         }
+
+        public static void ResetHighScores()
+        {
+            try
+            {
+                if (File.Exists(FilePath))
+                    File.Delete(FilePath);
+            }
+            catch
+            { }
+        }
     }
 }

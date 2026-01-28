@@ -31,6 +31,9 @@
             btnStartGame = new Button();
             btnHighScores = new Button();
             btnExit = new Button();
+            resetLevels = new Button();
+            resetHighScores = new Button();
+            resetData = new Button();
             SuspendLayout();
             // 
             // btnStartGame
@@ -63,11 +66,47 @@
             btnExit.UseVisualStyleBackColor = true;
             btnExit.Click += BtnExit_Click;
             // 
+            // resetLevels
+            // 
+            resetLevels.BackColor = Color.FromArgb(255, 255, 128);
+            resetLevels.Location = new Point(581, 386);
+            resetLevels.Name = "resetLevels";
+            resetLevels.Size = new Size(65, 52);
+            resetLevels.TabIndex = 3;
+            resetLevels.Text = "Reset Levels";
+            resetLevels.UseVisualStyleBackColor = false;
+            resetLevels.Click += BtnResetStory_Click;
+            // 
+            // resetHighScores
+            // 
+            resetHighScores.BackColor = Color.FromArgb(255, 255, 128);
+            resetHighScores.Location = new Point(652, 386);
+            resetHighScores.Name = "resetHighScores";
+            resetHighScores.Size = new Size(65, 52);
+            resetHighScores.TabIndex = 4;
+            resetHighScores.Text = "Reset Scores";
+            resetHighScores.UseVisualStyleBackColor = false;
+            resetHighScores.Click += BtnResetHighScores_Click;
+            // 
+            // resetData
+            // 
+            resetData.BackColor = Color.FromArgb(255, 255, 128);
+            resetData.Location = new Point(723, 386);
+            resetData.Name = "resetData";
+            resetData.Size = new Size(65, 52);
+            resetData.TabIndex = 5;
+            resetData.Text = "Reset All";
+            resetData.UseVisualStyleBackColor = false;
+            resetData.Click += BtnResetAll_Click;
+            // 
             // MenuForm
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(resetData);
+            Controls.Add(resetHighScores);
+            Controls.Add(resetLevels);
             Controls.Add(btnExit);
             Controls.Add(btnHighScores);
             Controls.Add(btnStartGame);
@@ -82,5 +121,8 @@
         private Button btnStartGame;
         private Button btnHighScores;
         private Button btnExit;
+        private Button resetLevels;
+        private Button resetHighScores;
+        private Button resetData;
     }
 }

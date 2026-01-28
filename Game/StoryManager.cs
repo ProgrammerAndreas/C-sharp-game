@@ -55,6 +55,19 @@ namespace PigeonCarrier.Game
             }
         }
 
+        public static void ResetProgress()
+        {
+            CurrentStoryLevel = 0;
+
+            try
+            {
+                if (File.Exists(SavePath))
+                    File.Delete(SavePath);
+            }
+            catch
+            { }
+        }
+
         private static void SaveProgress()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(SavePath)!);
