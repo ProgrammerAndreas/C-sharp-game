@@ -151,6 +151,75 @@ namespace PigeonCarrier
                 }
             }
 
+            if (_level == GameLevel.LevelTwo)
+            {
+                _envelopes.RemoveAll(e => e.Bounds.X + e.Bounds.Width < 0);
+
+                foreach (var envelope in _envelopes)
+                {
+                    envelope.Update(ObstacleSpeed);
+
+                    if (envelope.Collected) continue;
+
+                    foreach (var hitbox in _pigeon.GetHitBoxes())
+                    {
+                        if (envelope.TryCollect(hitbox))
+                        {
+                            _envelopesCollected++;
+                            break;
+                        }
+                    }
+                }
+
+                var lastMountain = _obstacles.Last();
+
+                if (lastMountain.X + lastMountain.Width < ClientSize.Width)
+                {
+                    var newMountain = new Mountain(
+                        lastMountain.X + ObstacleSpacing,
+                        ClientSize.Height
+                    );
+
+                    _obstacles.Add(newMountain);
+
+                    bool placeEnvelope =
+                        !_lastGapHadEnvelope &&
+                        _envelopes.Count < _envelopesRequired &&
+                        _rand.NextDouble() < 0.5;
+
+                    if (placeEnvelope)
+                    {
+                        int minX = lastMountain.X + lastMountain.Width + 10;
+                        int envelopeWidth = _envelopes.Any() ? (int)_envelopes.Last().Bounds.Width : 24;
+                        int maxX = newMountain.X - 10 - envelopeWidth; 
+
+                        if (maxX > minX)
+                        {
+                            int envelopeX = _rand.Next(minX, maxX);
+                            int envelopeY = ClientSize.Height - 120 - _rand.Next(0, 40);
+
+                            _envelopes.Add(new Envelope(envelopeX, envelopeY));
+                        }
+
+                        _lastGapHadEnvelope = true;
+                    }
+                    else
+                    {
+                        _lastGapHadEnvelope = false;
+                    }
+
+                    if (_envelopesCollected >= _envelopesRequired)
+                        newMountain.IsFinish = true;
+                }
+
+                if (_envelopesCollected >= _envelopesRequired &&
+                    _obstacles.Last().IsFinish)
+                {
+                    HandleLevelComplete();
+                    return;
+                }
+            }
+
             foreach (var obstacle in _obstacles)
             {
                 obstacle.Update(ObstacleSpeed);
@@ -168,7 +237,7 @@ namespace PigeonCarrier
                     return;
                 }
 
-                if (_level != GameLevel.LevelOne && !obstacle.HasBeenPassed && obstacle.X + obstacle.Width < _pigeon.Position.X)
+                if (_level != GameLevel.LevelOne && _level != GameLevel.LevelTwo && !obstacle.HasBeenPassed && obstacle.X + obstacle.Width < _pigeon.Position.X)
                 {
                     obstacle.HasBeenPassed = true;
                     _obstaclesPassed++;
