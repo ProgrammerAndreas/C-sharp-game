@@ -401,7 +401,7 @@ namespace PigeonCarrier
             _obstacles.Clear();
             _envelopes.Clear();
 
-            _envelopesRequired = 1;
+            _envelopesRequired = 5;
             _envelopesCollected = 0;
 
             _pigeon = new Pigeon(100, ClientSize.Height / 2);
